@@ -24,12 +24,69 @@ model Account {
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
 
-  name String 
-  balance BigInt @default(0)
-  currency String @default("USD")
+  name     String
+  type     AccountType
+  balance  BigInt      @default(0)
+  currency String      @default("USD")
+
+  entries LedgerEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model LedgerTransaction {
+  id             String            @id @default(uuid())
+  idempotencyKey String            @unique
+  description    String
+  status         TransactionStatus @default(PENDING)
 
+  entries LedgerEntry[]
+
+  originalTransactionId String?
+  originalTransaction   LedgerTransaction?  @relation("TransactionReversal", fields: [originalTransactionId], references: [id])
+  reversedBy            LedgerTransaction[] @relation("TransactionReversal")
+
+  occurredAt DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model LedgerEntry {
+  id String @id @default(uuid())
+
+  transactionId String
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  amount   BigInt
+  type     EntryType
+  currency String
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+}
+
+enum AccountType {
+  USER_WALLET
+  SYSTEM_REVENUE
+  SYSTEM_FEE
+  SYSTEM_ESCROW
+  SYSTEM_ADJUSTMENT
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+enum TransactionStatus {
+  PENDING
+  POSTED
+  FAILED
+  REVERSED
+}
