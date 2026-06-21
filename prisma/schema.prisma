@@ -14,15 +14,15 @@ model User {
 
   accounts Account[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model Account {
   id String @id @default(uuid())
 
   userId String?
-  user   User?   @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   name     String
   type     AccountType
@@ -31,25 +31,28 @@ model Account {
 
   entries LedgerEntry[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, currency])
 }
 
 model LedgerTransaction {
   id             String            @id @default(uuid())
   idempotencyKey String            @unique
   description    String
+  type           TransactionType
   status         TransactionStatus @default(PENDING)
 
   entries LedgerEntry[]
 
-  originalTransactionId String?
+  originalTransactionId String?             @unique
   originalTransaction   LedgerTransaction?  @relation("TransactionReversal", fields: [originalTransactionId], references: [id])
   reversedBy            LedgerTransaction[] @relation("TransactionReversal")
 
-  occurredAt DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  occurredAt DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model LedgerEntry {
@@ -65,7 +68,7 @@ model LedgerEntry {
   type     EntryType
   currency String
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   @@index([accountId, createdAt])
   @@index([transactionId])
@@ -77,6 +80,15 @@ enum AccountType {
   SYSTEM_FEE
   SYSTEM_ESCROW
   SYSTEM_ADJUSTMENT
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  FEE
+  ADJUSTMENT
+  REVERSAL
 }
 
 enum EntryType {
