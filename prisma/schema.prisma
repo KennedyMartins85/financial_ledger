@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
 model User {
   id           String @id @default(uuid())
   name         String
@@ -27,14 +27,12 @@ model Account {
   name     String
   type     AccountType
   balance  BigInt      @default(0)
-  currency String      @default("USD")
+  currency String
 
   entries LedgerEntry[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
-
-  @@unique([userId, currency])
 }
 
 model LedgerTransaction {
