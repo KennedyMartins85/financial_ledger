@@ -16,7 +16,7 @@ export const makeAccountController = (service: AccountService) => {
     },
 
     async create(
-      request: FastifyRequest<{ Body: { userId: string; type: AccountType; name: string } }>,
+      request: FastifyRequest<{ Body: { userId: string; type: AccountType; name: string, currency: string } }>,
       reply: FastifyReply
     ) {
       const account = await service.create(request.body);          

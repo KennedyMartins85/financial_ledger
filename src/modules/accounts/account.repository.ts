@@ -15,13 +15,14 @@ export const makeAccountRepository = (fastify: FastifyInstance) => {
       return prisma.account.findMany();
     },
 
-async create(data: { userId: string; name: string; type: AccountType }) {
+async create(data: { userId: string; name: string; type: AccountType, currency: string }) {
   return prisma.account.create({
     data: {
       userId: data.userId,
       name: data.name,   
       type: data.type,
       balance: 0,
+      currency: data.currency
     },
   });
 },
