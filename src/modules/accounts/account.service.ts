@@ -21,7 +21,7 @@ export const makeAccountService = (repository: AccountRepository) => {
       return repository.findAll();
     },
 
-    async create(data: { userId: string; name: string; type: AccountType, currency: string }) {
+    async create(data: { userId: string; name: string; type: AccountType; currency: string }) {
       return repository.create(data);
     },
   };
