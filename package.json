@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "api-ledger",
   "main": "src/server.ts",
-  "scripts": {
-    "dev": "node --watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/src/server.js"
-  },
+ "scripts": {
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "start": "node dist/src/server.js"
+},
   "keywords": [],
   "author": "Kennedy",
   "license": "ISC",
