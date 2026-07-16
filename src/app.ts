@@ -7,6 +7,7 @@ import { prismaPlugin } from './plugins/prisma.js'
 import { errorHandlerPlugin } from './plugins/error-handler.js'
 import { accountRoutes } from './modules/accounts/account.routes.js'
 import { ledgerTransactionRoutes } from './modules/ledger-transactions/ledger-transaction.routes.js'
+import { authRoutes } from './modules/auth/auth.routes.js'
 
 export const buildApp = () => {
   const app = Fastify({ logger: true })
@@ -24,7 +25,7 @@ export const buildApp = () => {
   app.get('/', async () => {
     return { status: 'ok', message: 'Ledgerly API is running' }
   })
-
+  app.register(authRoutes, { prefix: '/auth' })
   app.register(accountRoutes, { prefix: '/accounts' })
   app.register(ledgerTransactionRoutes, { prefix: '/transactions' })
 

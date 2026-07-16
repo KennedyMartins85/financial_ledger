@@ -15,11 +15,10 @@ export const makeAccountRepository = (fastify: FastifyInstance) => {
       return prisma.account.findMany();
     },
 
-<<<<<<< Updated upstream
-async create(data: { userId: string; name: string; type: AccountType, currency: string }) {
-=======
+
+
 async create(data: { userId: string; name: string; type: AccountType; currency: string }) {
->>>>>>> Stashed changes
+
   return prisma.account.create({
     data: {
       userId: data.userId,
