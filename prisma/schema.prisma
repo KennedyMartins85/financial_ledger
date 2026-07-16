@@ -1,12 +1,101 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+model User {
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  passwordHash String
+
+  accounts Account[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Account {
+  id String @id @default(uuid())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  name     String
+  type     AccountType
+  balance  BigInt      @default(0)
+  currency String
+
+  entries LedgerEntry[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model LedgerTransaction {
+  id             String            @id @default(uuid())
+  idempotencyKey String            @unique
+  description    String
+  type           TransactionType
+  status         TransactionStatus @default(PENDING)
+
+  entries LedgerEntry[]
+
+  originalTransactionId String?             @unique
+  originalTransaction   LedgerTransaction?  @relation("TransactionReversal", fields: [originalTransactionId], references: [id])
+  reversedBy            LedgerTransaction[] @relation("TransactionReversal")
+
+  occurredAt DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model LedgerEntry {
+  id String @id @default(uuid())
+
+  transactionId String
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  amount   BigInt
+  type     EntryType
+  currency String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+}
+
+enum AccountType {
+  USER_WALLET
+  SYSTEM_REVENUE
+  SYSTEM_FEE
+  SYSTEM_ESCROW
+  SYSTEM_ADJUSTMENT
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  FEE
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+enum TransactionStatus {
+  PENDING
+  POSTED
+  FAILED
+  REVERSED
 }
